@@ -1,3 +1,8 @@
+# file: pageTest.py
+# description: test printing characters in cmd.exe sreen
+# author: Hiukong Dan
+# version: 1.0    5/May/2021
+
 import os
 import time
 from os import system

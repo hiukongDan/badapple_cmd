@@ -21,6 +21,8 @@ import os
 import time
 import threading
 
+from compressTxt import decompress
+
 def getNextFrameTxt(frame):
     """
     used by function preprocess
@@ -78,12 +80,12 @@ def processBadAppleTxt():
     frame_rate = 30
     current_frame = 0
     start_time = time.time()
-    with open("badapple.txt", 'r') as fil:
+    with open("compressed_badapple.txt", 'r') as fil:
         while True:
             try:
                 display = ""
                 for x in range(win_size[1]-1):
-                    display += fil.readline()
+                    display += decompress(fil.readline())
                 fil.readline()
                 print(display)
                 next_frame_time = (current_frame + 1) * 1 / frame_rate + start_time
