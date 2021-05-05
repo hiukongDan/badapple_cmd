@@ -9,6 +9,7 @@ TODO:
 improve resolution of the translated ascii code image
 manipulate cmd buffer directly and using another method instead of print
 hide cursor if possible (the last line always showing blank due to appearance of cursor)
+generating txt: using a compress algorithm to store converted strings
 """
 
 import cv2
