@@ -11,6 +11,7 @@
 - convert mp4 to mp3: [moviepy](https://pypi.org/project/moviepy/)
 - image manipulation: [opencv-python](https://pypi.org/project/opencv-python/)
 - everlasting numpy as np: [numpy](https://pypi.org/project/numpy/)
+- make video smoother using pywin32: [pywin32](https://mhammond.github.io/pywin32/)
 
 ### Requirement
 - Python3 (Python 3.8.9 in author machine)

@@ -20,8 +20,18 @@ import math
 import os
 import time
 import threading
+import win32console
+from win32console import *
+
+
+from configparser import ConfigParser
+from ctypes import wintypes
 
 from compressTxt import decompress
+
+STD_INPUT_HANDLE  = wintypes.DWORD(-10).value
+STD_OUTPUT_HANDLE = wintypes.DWORD(-11).value
+STD_ERROR_HANDLE  = wintypes.DWORD(-12).value
 
 def getNextFrameTxt(frame):
     """
@@ -43,7 +53,7 @@ def getNextFrameTxt(frame):
     cv2.imshow('frame', frame)
     
     win_size = os.get_terminal_size()
-    
+        
     ret = []
     for row_count in range(0, len(raw_pixels), int(raw_pixels.shape[0]/win_size[1])):
         row = raw_pixels[row_count]
@@ -57,11 +67,24 @@ def getNextFrameTxt(frame):
         res += "\n"
         
     return res
+    
+    
         
 def preprocess():
     """
     used to generated bad apple txt from original mp4 data
     """
+    win_size = os.get_terminal_size()
+    config_file = "config.ini"
+    config = ConfigParser()
+    config["SCREEN_SIZE"] = {
+                            columns : win_size[0],
+                            rows : win_size[1]
+                            }
+    with open(config_file, 'w') as conf_file:
+        conf_file.write(config)
+        
+        
     with open("badapple.txt", 'w') as fil:
         cap = cv2.VideoCapture("Touhou - Bad Apple.mp4")
         while(cap.isOpened()):
@@ -70,6 +93,9 @@ def preprocess():
                 fil.write(getNextFrameTxt(frame))
         cap.release()
         cv2.destroyAllWindows()
+        fil.writelines((" "*win_size[0]+"\n") * win_size[1])
+        
+        
         
 def processBadAppleTxt():
     """
@@ -80,6 +106,41 @@ def processBadAppleTxt():
     frame_rate = 30
     current_frame = 0
     start_time = time.time()
+    
+    config = ConfigParser()
+    config.read("config.ini")
+    win_size = (config["SCREEN_SIZE"]["columns"], config["SCREEN_SIZE"]["rows"])
+    win_size = (int(win_size[0]), int(win_size[1]))
+
+    console_buffer_old = win32console.GetStdHandle(STD_OUTPUT_HANDLE)
+    
+    console_buffer_new = win32console.CreateConsoleScreenBuffer()
+    console_buffer_new.SetConsoleCursorInfo(5, False);
+    console_window_buffer_info = console_buffer_old.GetConsoleScreenBufferInfo()
+    new_win_size = console_window_buffer_info['Size']
+    win_rect = console_window_buffer_info['Window']
+    new_win_size.X = win_rect.Right - win_rect.Left + 1
+    new_win_size.Y = win_rect.Bottom - win_rect.Top + 1
+    
+    for key in console_window_buffer_info:
+        print("{}: {}".format(key, console_window_buffer_info[key]))
+    
+    if new_win_size.X < win_size[0]: new_win_size.X = win_size[0]
+    if new_win_size.Y < win_size[1]: new_win_size.Y = win_size[1]
+    
+    win_rect.Right = win_rect.Left + new_win_size.X - 1
+    win_rect.Bottom = win_rect.Top + new_win_size.Y - 1
+    
+    print(win_rect)
+
+    new_win_size.Y = 9999
+    console_buffer_new.SetConsoleScreenBufferSize(new_win_size)
+    console_buffer_new.SetConsoleWindowInfo(True, win_rect)
+    console_buffer_new.SetConsoleActiveScreenBuffer()
+    #console_buffer_new.SetStdHandle(STD_OUTPUT_HANDLE)
+    
+    win32console.SetConsoleTitle("B A D A P P L E")
+    
     with open("compressed_badapple.txt", 'r') as fil:
         while True:
             try:
@@ -87,7 +148,8 @@ def processBadAppleTxt():
                 for x in range(win_size[1]-1):
                     display += decompress(fil.readline())
                 fil.readline()
-                print(display)
+                #print(display)
+                console_buffer_new.WriteConsoleOutputCharacter(display, win32console.PyCOORDType(X=0, Y=0))
                 next_frame_time = (current_frame + 1) * 1 / frame_rate + start_time
                 current_frame += 1
                 lag = next_frame_time - time.time()
@@ -96,7 +158,11 @@ def processBadAppleTxt():
             except AssertionError as error:
                 print(error)
                 break
-
+    
+    console_buffer_old.SetConsoleActiveScreenBuffer()
+    #console_buffer_old.SetStdHandle(STD_OUTPUT_HANDLE)
+    console_buffer_new.Close()
+    
 
 def playBadAppleSound():
     """
@@ -112,6 +178,8 @@ if __name__ == "__main__":
     
     display_task.start()
     playsound_task.start()
+    
+    
     
     """
     # opencv test code
