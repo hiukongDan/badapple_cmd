@@ -105,6 +105,8 @@ def playBadAppleSound():
     playsound.playsound("Touhou - Bad Apple.mp3")
 
 if __name__ == "__main__":
+    # process for your cmd window
+    # preprocess()
     display_task = threading.Thread(target=processBadAppleTxt)
     playsound_task = threading.Thread(target=playBadAppleSound)
     
