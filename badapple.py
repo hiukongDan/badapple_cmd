@@ -78,11 +78,11 @@ def preprocess():
     config_file = "config.ini"
     config = ConfigParser()
     config["SCREEN_SIZE"] = {
-                            columns : win_size[0],
-                            rows : win_size[1]
+                            "columns" : str(win_size[0]),
+                            "rows" : str(win_size[1])
                             }
     with open(config_file, 'w') as conf_file:
-        conf_file.write(config)
+        config.write(conf_file)
         
         
     with open("badapple.txt", 'w') as fil:
@@ -182,8 +182,6 @@ def playBadAppleSound():
     playsound.playsound("Touhou - Bad Apple.mp3")
 
 if __name__ == "__main__":
-    # process for your cmd window
-    # preprocess()
     display_task = threading.Thread(target=processBadAppleTxt)
     playsound_task = threading.Thread(target=playBadAppleSound)
     
